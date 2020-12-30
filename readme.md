@@ -1,4 +1,4 @@
-# gitRepository目录是一个版本库 #：
+#  gitRepository目录是一个版本库  #
 
  版本库定义：
 
@@ -72,7 +72,7 @@
 	//查看版本号commit id对应的提交说明（所以必须有准确的提交说明）
 	$ git reflog
 	
-  10.撤销修改命令
+  10.撤销修改命令(在工作区的和暂缓区的区别)
 
 	//这里有两种情况：
 
@@ -81,9 +81,46 @@
 	//一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
 	
 	$ git checkout -- readme.txt
+	
+	//用命令git reset HEAD <file>可以把暂存区的修改撤销掉（unstage），重新放回工作区
+	$ git reset HEAD readme.txt
+	Unstaged changes after reset:
+	M	readme.txt
 
-  git checkout -- file命令中的--很重要，没有--，就变成了“切换到另一个分支”的命令，我们在后面的分支管理中会再次遇到git checkout命令。
+ ` git checkout -- file`命令中的--很重要，没有--，就变成了“切换到另一个分支”的命令，我们在后面的分支管理中会再次遇到`git checkout`命令。
 
+ ` git reset`命令既可以回退版本，也可以把暂存区的修改回退到工作区。当我们用`HEAD`时，表示最新的版本。
+
+
+  场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
+
+  场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令git reset HEAD <file>，就回到了场景1，第二步按场景1操作。
+
+  场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
+
+ 11.删除文件
+
+  一般情况下，你通常直接在文件管理器中把没用的文件删了，或者用rm命令删了：
+
+	$ rm readme.txt
+
+  现在你有两个选择，一是确实要从版本库中删除该文件，那就用命令git rm删掉，并且git commit：
+
+	$ git rm readme.txt
+	rm 'readme.txt'
+
+	$ git commit -m "remove readme.txt"
+	[master d46f35e] remove readme.txt
+	 1 file changed, 1 deletion(-)
+	 delete mode 100644 readme.txt
+
+  现在，文件就从版本库中被删除了。
+
+  另一种情况是删错了，因为版本库里还有呢，所以可以很轻松地把误删的文件恢复到最新版本：
+
+	$ git checkout -- readme.txt
+
+  `git checkout`其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
 
 
 ## 二 概念 ##
@@ -127,4 +164,49 @@ Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的�
 
 
 **Git是如何跟踪修改的，每次修改，如果不用git add到暂存区，那就不会加入到commit中**
+
+##  三 远程仓库github  ##
+
+1.GitHub仓库
+
+第1步：创建SSH Key（可参考[windows下生成ssh key详解](https://blog.csdn.net/Suo_ivy/article/details/79940839)）。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件，如果已经有了，可直接跳到下一步。如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：
+
+	$ ssh-keygen -t rsa -C "youremail@example.com"
+
+你需要把邮件地址换成你自己的邮件地址，然后一路回车，使用默认值即可，由于这个Key也不是用于军事目的，所以也无需设置密码。
+
+如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+
+第2步：登陆GitHub，打开“Settings”，“SSH Keys”页面：
+
+![](https://img-blog.csdnimg.cn/20201230144156895.png)
+
+然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
+
+![](https://img-blog.csdnimg.cn/20201230144156895.png)
+
+点“New SSH Key”，你就应该看到已经添加的Key：
+
+![](https://img-blog.csdnimg.cn/20201230144309946.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+
+为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。
+
+当然，GitHub允许你添加多个Key。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。
+
+最后友情提示，在GitHub上免费托管的Git仓库，任何人都可以看到喔（但只有你自己才能改）。所以，不要把敏感信息放进去。
+
+
+首先，登陆GitHub，然后，在右上角找到“New repository”按钮，创建一个新的仓库：
+
+![](https://img-blog.csdnimg.cn/20201230144031965.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+
+在Repository name填入`gitstudy`，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
+
+![](https://img-blog.csdnimg.cn/20201230144709445.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+
+![](https://img-blog.csdnimg.cn/2020123014445670.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+
+目前，在GitHub上的这个`gitstudy`仓库还是空的，GitHub告诉我们，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。
+
+现在，我们根据GitHub的提示，在本地的`gitstudy`仓库下运行命令：
 
