@@ -102,3 +102,17 @@ Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的�
 第二步是用`git commit`提交更改，实际上就是把暂存区的所有内容提交到当前分支。
 
 因为我们创建Git版本库时，Git自动为我们创建了唯一一个`master`分支，所以，现在，`git commit`就是往`master`分支上提交更改。
+
+一旦提交后，如果你又没有对工作区做任何修改，那么工作区就是“干净”的：
+
+	$ git status
+	On branch master
+	nothing to commit, working tree clean
+
+现在版本库变成了这样，暂存区就没有任何内容了：
+
+![](https://www.liaoxuefeng.com/files/attachments/919020100829536/0)
+
+
+**Git是如何跟踪修改的，每次修改，如果不用git add到暂存区，那就不会加入到commit中**
+
