@@ -1,6 +1,6 @@
 #  git 仓库学习总结  #
 
-**学习内容来自全部来自：廖雪峰git教程https://www.liaoxuefeng.com/wiki/896043488029600，这里只做个人总结**
+**学习内容全部来自：[廖雪峰git教程](https://www.liaoxuefeng.com/wiki/896043488029600)，这里更新了新的内容并且做了个人总结**
 
  版本库定义：
 
@@ -137,6 +137,39 @@
   (3)此后，每次本地提交后，只要有必要，就可以使用命令`git push origin master`推送最新修改；
 
 	$ git push origin master
+
+13.远程克隆仓库
+
+	//以gitstudy项目为例，输入如下命令
+	$ git clone git@github.com:hellogaod/gitstudy.git
+
+要克隆一个仓库，首先必须知道仓库的地址，然后使用git clone命令克隆。
+
+Git支持多种协议，包括https，但ssh协议速度最快。
+
+
+14.分支
+
+  创建并切换到分支
+
+	$ git checkout -b dev
+	Switched to a new branch 'dev'
+
+  git checkout命令加上-b参数表示创建并切换，相当于以下两条命令
+
+	$ git branch dev
+	$ git checkout dev
+	Switched to branch 'dev'
+
+  然后，用git branch命令查看当前分支
+
+	$ git branch
+	* dev
+	  master
+
+  git branch命令会列出所有分支，当前分支前面会标一个*号。
+
+  然后，我们就可以在dev分支上正常提交，比如对readme.md做个修改，加上XXX提交
 
 
 
