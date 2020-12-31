@@ -148,7 +148,9 @@
 Git支持多种协议，包括https，但ssh协议速度最快。
 
 
-14.分支
+14.1分支创建，切换，合并
+
+ (1)git checkout
 
   创建并切换到分支
 
@@ -171,6 +173,69 @@ Git支持多种协议，包括https，但ssh协议速度最快。
 
   然后，我们就可以在dev分支上正常提交，比如对readme.md做个修改，加上XXX提交
 
+  现在，dev分支的工作完成，我们就可以切换回master分支：
+
+	$ git checkout master
+	Switched to branch 'master'
+
+  切换回master分支后，再查看一个readme.md文件，刚才添加的内容不见了！因为那个提交是在dev分支上，而master分支此刻的提交点并没有变：
+
+  现在，我们把dev分支的工作成果合并到master分支上：
+
+	$ git merge dev
+	Updating d46f35e..b17d20e
+	Fast-forward
+	 readme.txt | 1 +
+	 1 file changed, 1 insertion(+)
+
+  git merge命令用于合并指定分支到当前分支。合并后，再查看readme.md的内容，就可以看到，和dev分支的最新提交是完全一样的。
+
+  注意到上面的`Fast-forward`信息，Git告诉我们，这次合并是“快进模式”，也就是直接把master指向dev的当前提交，所以合并速度非常快。
+
+	//合并完成后，就可以放心地删除dev分支了
+	$ git branch -d dev
+	Deleted branch dev (was 00d9ea4).
+
+  删除后，查看branch，就只剩下master分支了：
+
+	$ git branch
+	* master
+	
+  (2)switch
+
+  我们注意到切换分支使用git checkout <branch>，而前面讲过的撤销修改则是git checkout -- <file>，同一个命令，有两种作用，确实有点令人迷惑。
+
+  实际上，切换分支这个动作，用switch更科学。因此，最新版本的Git提供了新的git switch命令来切换分支：
+
+  创建并切换到新的dev分支，可以使用：
+
+	$ git switch -c dev
+
+  直接切换到已有的master分支，可以使用：
+	
+	$ git switch master
+
+  使用新的git switch命令，比git checkout要更容易理解。
+
+  (3)小结
+
+  Git鼓励大量使用分支：
+
+  查看分支：`git branch`
+
+  创建分支：`git branch <name>`
+
+  切换分支：`git checkout <name>或者git switch <name>`
+ 
+  创建+切换分支：`git checkout -b <name>或者git switch -c <name>`
+
+  合并某分支到当前分支：`git merge <name>`
+
+  删除分支：`git branch -d <name>`
+
+ **因为创建、合并和删除分支非常快，所以Git鼓励你使用分支完成某个任务，合并后再删掉分支，这和直接在master分支上工作效果是一样的，但过程更安全。**
+
+14.2 分支冲突
 
 
 ## 二 概念 ##
