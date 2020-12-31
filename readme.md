@@ -360,6 +360,4 @@ github创建仓库如下图（从2019年开始，github创建私有仓库免费�
 
 	$ git push origin master
 
-master分支上加了啥
 
-我勒个去，我在看这里的冲突到底多能耐
