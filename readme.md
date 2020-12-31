@@ -1,4 +1,6 @@
-#  gitRepository目录是一个版本库  #
+#  git 仓库学习总结  #
+
+**学习内容来自全部来自：廖雪峰git教程https://www.liaoxuefeng.com/wiki/896043488029600，这里只做个人总结**
 
  版本库定义：
 
@@ -122,6 +124,21 @@
 
   `git checkout`其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
 
+12.本地git仓库推送到github远程仓库(还有相关配置如下有介绍)
+
+  (1)要关联一个远程库，使用命令
+
+	$ git remote add origin git@github.com:hellogaod/gitstudy.git
+
+  (2)关联后，使用命令`git push -u origin master`第一次推送master分支的所有内容；
+
+	$ git push -u origin master
+
+  (3)此后，每次本地提交后，只要有必要，就可以使用命令`git push origin master`推送最新修改；
+
+	$ git push origin master
+
+
 
 ## 二 概念 ##
 
@@ -165,11 +182,15 @@ Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的�
 
 **Git是如何跟踪修改的，每次修改，如果不用git add到暂存区，那就不会加入到commit中**
 
-##  三 远程仓库github  ##
+##  三 本地关联github远程仓库  ##
 
-1.GitHub仓库
+### 1.本地关联到gitHub上 ###
 
-第1步：创建SSH Key（可参考[windows下生成ssh key详解](https://blog.csdn.net/Suo_ivy/article/details/79940839)）。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件，如果已经有了，可直接跳到下一步。如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：
+第1步：创建SSH Key。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件，如果已经有了，可直接跳到下一步。
+
+![](https://img-blog.csdnimg.cn/20201231134115699.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+
+如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：
 
 	$ ssh-keygen -t rsa -C "youremail@example.com"
 
@@ -179,15 +200,13 @@ Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的�
 
 第2步：登陆GitHub，打开“Settings”，“SSH Keys”页面：
 
-![](https://img-blog.csdnimg.cn/20201230144156895.png)
+![](https://img-blog.csdnimg.cn/20201231134304426.png)
+
+![](https://img-blog.csdnimg.cn/20201231134423605.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
 
 然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
 
-![](https://img-blog.csdnimg.cn/20201230144156895.png)
-
-点“New SSH Key”，你就应该看到已经添加的Key：
-
-![](https://img-blog.csdnimg.cn/20201230144309946.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+![](https://img-blog.csdnimg.cn/20201231134621479.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
 
 为什么GitHub需要SSH Key呢？因为GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。
 
@@ -195,18 +214,50 @@ Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的�
 
 最后友情提示，在GitHub上免费托管的Git仓库，任何人都可以看到喔（但只有你自己才能改）。所以，不要把敏感信息放进去。
 
+### 2.本地git仓库push到gitHub仓库 ###
 
-首先，登陆GitHub，然后，在右上角找到“New repository”按钮，创建一个新的仓库：
+github创建仓库如下图（从2019年开始，github创建私有仓库免费，如果你不想让别人看到你的仓库，可以设置私有，实在不放心，后面还会介绍手动创建一个git仓库）
 
-![](https://img-blog.csdnimg.cn/20201230144031965.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+![](https://img-blog.csdnimg.cn/20201231135356897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
 
-在Repository name填入`gitstudy`，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
-
-![](https://img-blog.csdnimg.cn/20201230144709445.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
-
-![](https://img-blog.csdnimg.cn/2020123014445670.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+在Repository name填入`gitstudy`，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库
 
 目前，在GitHub上的这个`gitstudy`仓库还是空的，GitHub告诉我们，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。
 
+
 现在，我们根据GitHub的提示，在本地的`gitstudy`仓库下运行命令：
 
+	$ git remote add origin git@github.com:hellogaod/gitstudy.git
+
+远程库的名字就是origin，这是Git默认的叫法，也可以改成别的，但是origin这个名字一看就知道是远程库。
+
+下一步，就可以把本地库的所有内容推送到远程库上：
+
+	$ git push -u origin master
+	The authenticity of host 'github.com (13.250.177.223)' can't be established.
+	RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+	Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+	Warning: Permanently added 'github.com,13.250.177.223' (RSA) to the list of known hosts.
+	Enumerating objects: 29, done.
+	Counting objects: 100% (29/29), done.
+	Delta compression using up to 4 threads
+	Compressing objects: 100% (24/24), done.
+	Writing objects: 100% (29/29), 7.82 KiB | 1001.00 KiB/s, done.
+	Total 29 (delta 7), reused 0 (delta 0), pack-reused 0
+	remote: Resolving deltas: 100% (7/7), done.
+	To github.com:hellogaod/gitstudy.git
+	 * [new branch]      master -> master
+	Branch 'master' set up to track remote branch 'master' from 'origin'.
+
+
+把本地库的内容推送到远程，用git push命令，实际上是把当前分支master推送到远程。
+
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+
+推送成功后，可以立刻在GitHub页面中看到远程库的内容已经和本地一模一样：
+
+![](https://img-blog.csdnimg.cn/20201231140633639.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Zvc2hlbmd0YW5n,size_16,color_FFFFFF,t_70)
+
+从现在起，只要本地作了提交，就可以通过命令：
+
+	$ git push origin master
