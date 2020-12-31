@@ -237,6 +237,52 @@ Git支持多种协议，包括https，但ssh协议速度最快。
 
 14.2 分支冲突
 
+  准备新的feature1分支，继续我们的新分支开发：
+
+	$ git switch -c feature1
+	Switched to a new branch 'feature1'
+
+  修改readme.md最后一行
+
+  在feature1分支上提交（add，commit），然后切换到master分支
+
+	$ git switch master
+	Switched to branch 'master'
+
+  在master分支上把readme.md文件的最后一行并提交。
+  
+  在当前master分支下合并feature1分支
+
+	$ git merge feature1
+
+  果然冲突了！Git告诉我们，readme.md文件存在冲突，必须手动解决冲突后再提交。`git status`也可以告诉我们冲突的文件
+
+  我们可以直接查看readme.md的内容：
+
+	<<<<<<< HEAD
+	Creating a new branch is quick & simple.
+	=======
+	Creating a new branch is quick AND simple.
+	>>>>>>> feature1
+
+  Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容，我们修改后保存，然后在提交即可。
+
+  用带参数的git log也可以看到分支的合并情况：
+
+	$ git log --graph --pretty=oneline --abbrev-commit
+
+  并且删除feature1分支
+
+	$ git branch -d feature1
+
+14.3分支管理
+
+  通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
+
+  如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
+
+  
+
 
 ## 二 概念 ##
 
