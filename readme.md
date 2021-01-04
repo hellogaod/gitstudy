@@ -275,14 +275,302 @@ Git支持多种协议，包括https，但ssh协议速度最快。
 
 	$ git branch -d feature1
 
-**14.3分支管理**
+**14.3分支策略管理**
+
+ **（1）分支管理**
 
   通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
 
   如果要强制禁用`Fast forward`模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
 
-**14.4 Bug分支**  
+  实战如下：
 
+  ①首先，仍然创建并切换dev分支：
+
+	$ git switch -c dev
+	Switched to a new branch 'dev'
+
+  ②修改readme.md文件，并提交一个新的commit：
+
+	$ git add readme.md 
+	$ git commit -m "add merge"
+	[dev f52c633] add merge
+	 1 file changed, 1 insertion(+)
+  
+  ③现在，我们切换回master：
+
+	$ git switch master
+	Switched to branch 'master'
+
+  ④准备合并`dev`分支，请注意--no-ff参数，表示禁用`Fast forward`：
+
+	$ git merge --no-ff -m "merge with no-ff" dev
+	Merge made by the 'recursive' strategy.
+	 readme.md | 1 +
+	 1 file changed, 1 insertion(+)
+
+  ⑤因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。
+
+  ⑥合并后，我们用git log看看分支历史：
+
+	$ git log --graph --pretty=oneline --abbrev-commit
+	*   e1e9c68 (HEAD -> master) merge with no-ff
+	|\  
+	| * f52c633 (dev) add merge
+	|/  
+	*   cf810e4 conflict fixed
+	...
+
+  不使用`Fast forward`模式，merge后就像这样：
+
+![](https://www.liaoxuefeng.com/files/attachments/919023225142304/0)
+
+  比较一下使用 `Fast forward`模式：
+
+![](https://www.liaoxuefeng.com/files/attachments/919023000423040/0)
+
+
+  **合并分支时，加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并。**
+
+
+  **（2）分支策略**
+
+  在实际开发中，我们应该按照几个基本原则进行分支管理：
+ 
+  ①首先，`master`分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+
+  ②干活都在`dev`分支上，也就是说，`dev`分支是不稳定的，到某个时候，比如1.0版本发布时，再把`dev`分支合并到`master`上，在`master`分支发布1.0版本；
+
+  ③你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了。
+
+  所以，团队合作的分支看起来就像这样：
+
+![](https://www.liaoxuefeng.com/files/attachments/919023260793600/0)
+
+  **（3）Bug分支**
+
+  软件开发中，bug就像家常便饭一样。有了bug就需要修复，在Git中，由于分支是如此的强大，所以，每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除。
+
+  场景：当前正在`dev`分支上工作尚未完成（未提交），但是需要改一个`bug`（创建一个`issue-101代号`-bug分支）
+
+  ①master分支上修改bug
+  	
+	//查看提交状态，未提交
+	$ git status
+	On branch dev
+	Changes to be committed:
+	  (use "git reset HEAD <file>..." to unstage)
+	
+		new file:   hello.py
+	
+	Changes not staged for commit:
+	  (use "git add <file>..." to update what will be committed)
+	  (use "git checkout -- <file>..." to discard changes in working directory)
+	
+		modified:   readme.md
+
+
+	//Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作
+	$ git stash
+	Saved working directory and index state WIP on dev: f52c633 add merge
+
+
+  现在，用git status查看工作区，就是干净的（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。
+
+  首先确定要在哪个分支上修复bug，假定需要在master分支上修复，就从master创建临时分支：
+
+	//切换回maseter分支
+	$ git checkout master
+	Switched to branch 'master'
+	Your branch is ahead of 'origin/master' by 6 commits.
+	  (use "git push" to publish your local commits)
+	
+	//创建issue-101临时分支
+	$ git checkout -b issue-101
+	Switched to a new branch 'issue-101'
+
+  修复完，add然后commit。
+
+  完成后，切换到master分支，并完成合并，最后删除issue-101分支：
+
+	$ git switch master
+	Switched to branch 'master'
+	Your branch is ahead of 'origin/master' by 6 commits.
+	  (use "git push" to publish your local commits)
+	
+	//不要采用Fast forward模式
+	$ git merge --no-ff -m "merged bug fix 101" issue-101
+	Merge made by the 'recursive' strategy.
+	 readme.txt | 2 +-
+	 1 file changed, 1 insertion(+), 1 deletion(-)
+
+  然后回到`dev`分支继续干活
+  
+	$ git switch dev
+	Switched to branch 'dev'
+	
+	$ git status
+	On branch dev
+	nothing to commit, working tree clean
+
+  工作区是干净的，刚才的工作现场存到哪去了？用`git stash list`命令看看：
+
+	$ git stash list
+	stash@{0}: WIP on dev: f52c633 add merge
+
+  工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+
+  一是用`git stash apply`恢复，但是恢复后，stash内容并不删除，你需要用`git stash drop`来删除；
+
+  另一种方式是用`git stash pop`，恢复的同时把stash内容也删了：
+
+	$ git stash pop
+	On branch dev
+	Changes to be committed:
+	  (use "git reset HEAD <file>..." to unstage)
+	
+		new file:   hello.py
+	
+	Changes not staged for commit:
+	  (use "git add <file>..." to update what will be committed)
+	  (use "git checkout -- <file>..." to discard changes in working directory)
+	
+		modified:   readme.md
+	
+	Dropped refs/stash@{0} (5d677e2ee266f39ea296182fb2354265b91b3b2a)
+
+
+  再用`git stash list`查看，就看不到任何stash内容了：
+
+	$ git stash list
+
+  你可以多次stash，恢复的时候，先用`git stash list`查看，然后恢复指定的stash，用命令：
+
+	$ git stash apply stash@{0}
+
+  ②master分支上修复的bug，想要合并到当前dev分支
+  
+  我们只需要把4c805e2 fix bug 101这个提交所做的修改“复制”到dev分支。注意：我们只想复制4c805e2 fix bug 101这个提交所做的修改，并不是把整个master分支merge过来。
+
+  为了方便操作，Git专门提供了一个cherry-pick命令，让我们能复制一个特定的提交到当前分支：
+
+	$ git branch
+	* dev
+	  master
+	//将4c805e2任务赋值到当前dev分支上
+	$ git cherry-pick 4c805e2
+	[master 1d4b803] fix bug 101
+	 1 file changed, 1 insertion(+), 1 deletion(-)
+
+  Git自动给dev分支做了一次提交，注意这次提交的commit是1d4b803，它并不同于master的4c805e2，因为这两个commit只是改动相同，但确实是两个不同的commit。用git cherry-pick，我们就不需要在dev分支上手动再把修bug的过程重复一遍。
+
+  **（4）Feature分支**
+
+  添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，每添加一个新功能，最好新建一个feature分支，在上面开发，完成后，合并，最后，删除该feature分支。
+
+  例：现在，你终于接到了一个新任务：开发代号为Vulcan的新功能，该功能计划用于下一代星际飞船。并且让人蛋碎的是开发完了该功能取消了！！！
+
+  于是准备开发：
+
+	$ git switch -c feature-vulcan
+	Switched to a new branch 'feature-vulcan'
+
+  5分钟后，开发完毕：
+
+	$ git add vulcan.py
+	
+	$ git status
+	On branch feature-vulcan
+	Changes to be committed:
+	  (use "git reset HEAD <file>..." to unstage)
+	
+		new file:   vulcan.py
+	
+	$ git commit -m "add feature vulcan"
+	[feature-vulcan 287773e] add feature vulcan
+	 1 file changed, 2 insertions(+)
+	 create mode 100644 vulcan.py		
+
+  切回`dev`，准备合并：
+
+	$ git switch dev
+
+  一切顺利的话，feature分支和bug分支是类似的，合并，然后删除。
+
+  但是！就在此时，接到上级命令，因经费不足，新功能必须取消！
+
+  虽然白干了，但是这个包含机密资料的分支还是必须就地销毁：
+
+	$ git branch -d feature-vulcan
+	error: The branch 'feature-vulcan' is not fully merged.
+	If you are sure you want to delete it, run 'git branch -D feature-vulcan'.
+
+  销毁失败。Git友情提醒，`feature-vulcan`分支还没有被合并，如果删除，将丢失掉修改，如果要强行删除，需要使用大写的-D参数。
+
+  现在我们强行删除：
+
+	$ git branch -D feature-vulcan
+	Deleted branch feature-vulcan (was 287773e).
+
+  **15.多人协作**
+
+  当你从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且，远程仓库的默认名称是origin。
+
+  要查看远程库的信息，用`git remote`：
+
+	$ git remote
+	origin
+
+  或者，用`git remote -v`显示更详细的信息：
+
+	$ git remote -v
+	origin  git@github.com:hellogaod/gitstudy.git (fetch)
+	origin  git@github.com:hellogaod/gitstudy.git (push)
+
+  上面显示了可以抓取和推送的`origin`的地址。如果没有推送权限，就看不到push的地址。
+
+  **（1）推送分支**
+
+  推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+
+	$ git push origin master
+
+  如果要推送其他分支，比如`dev`，就改成：
+
+	$ git push origin dev
+
+  但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+
+ - master分支是主分支，因此要时刻与远程同步；
+
+ - dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+
+ - bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+
+ - feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+
+  总之，就是在Git中，分支完全可以在本地自己藏着玩，是否推送，视你的心情而定！
+
+  **(2)抓取分支**
+
+  多人协作时，大家都会往master和dev分支上推送各自的修改。
+
+  现在，模拟一个你的小伙伴，可以在另一台电脑（注意要把SSH Key添加到GitHub）或者同一台电脑的另一个目录下克隆：
+
+	$ git clone git@github.com:hellogaod/gitstudy.git
+	Cloning into 'learngit'...
+	remote: Counting objects: 40, done.
+	remote: Compressing objects: 100% (21/21), done.
+	remote: Total 40 (delta 14), reused 40 (delta 14), pack-reused 0
+	Receiving objects: 100% (40/40), done.
+	Resolving deltas: 100% (14/14), done.
+
+  当你的小伙伴从远程库clone时，默认情况下，你的小伙伴只能看到本地的master分支。不信可以用git branch命令看看：
+
+	$ git branch
+	* master
+
+  
 
 ## 二 概念 ##
 
