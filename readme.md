@@ -1224,4 +1224,3 @@ github创建仓库如下图（从2019年开始，github创建私有仓库免费�
 
 	$ git ci -m "bala bala bala..."
 
-### 3.搭建Git服务器 ###
